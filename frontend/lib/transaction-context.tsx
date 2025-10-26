@@ -26,11 +26,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
   // Initialize SSE connection ONCE when provider mounts
   useEffect(() => {
-    console.log("[TransactionProvider] Connecting to SSE stream...");
-    
     const cleanup = SSEClient(
       (transaction: Transaction) => {
-        console.log("[TransactionProvider] Received transaction:", transaction.trans_num);
         addTransaction(transaction);
       },
       (error: any) => {
@@ -40,7 +37,6 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
     // Cleanup function closes the SSE connection when provider unmounts
     return () => {
-      console.log("[TransactionProvider] Closing SSE stream");
       cleanup();
     };
   }, []); // Empty dependency array - only run once

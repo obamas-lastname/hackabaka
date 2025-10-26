@@ -82,17 +82,6 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
     return filtered.slice(0, maxMarkers);
   }, [transactions, showOnlyFraud, maxMarkers]);
 
-  console.log("FraudMap rendering with transactions:", filteredTransactions.length);
-  if (filteredTransactions.length > 0) {
-    console.log("Sample transaction:", {
-      lat: filteredTransactions[0].lat,
-      long: filteredTransactions[0].long,
-      merch_lat: (filteredTransactions[0] as any).merch_lat,
-      merch_long: (filteredTransactions[0] as any).merch_long,
-      merchant: filteredTransactions[0].merchant,
-    });
-  }
-
   return (
     <div className={`relative w-full h-full ${className}`} style={{ minHeight: "100%" }}>
       <style>{`
@@ -147,13 +136,6 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
           // Calculate fade-out delay based on position (oldest markers fade out first)
           const progressFromEnd = index / filteredTransactions.length;
           const fadeDelay = progressFromEnd * 30; // Max 30 seconds
-
-          console.log(`Rendering transaction ${transaction.trans_num}:`, {
-            customerPos,
-            merchantPos,
-            isFraud,
-            fadeDelay,
-          });
 
           return (
             <div 

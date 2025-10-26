@@ -75,7 +75,6 @@ export default function FraudMapPage() {
   useEffect(() => {
     const cleanup = SSEClient(
       (transaction: Transaction) => {
-        console.log("Received transaction in fraud-map page:", transaction);
         addTransaction(transaction);
       },
       (err: any) => {
