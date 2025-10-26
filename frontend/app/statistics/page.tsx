@@ -153,21 +153,6 @@ export default function StatisticsPage() {
     ).slice(0, 10)); // Top 10 categories
   }, [transactions]);
 
-  useEffect(() => {
-    const unsubscribe = SSEClient(
-      (data: Transaction) => {
-        setTransactions((prev) => [data, ...prev].slice(0, 10000));
-      },
-      (error: any) => {
-        console.error("SSE Error:", error);
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
   // Calculate stats
   const stats = useMemo(() => {
     if (!transactions || transactions.length === 0) {
