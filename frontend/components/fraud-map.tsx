@@ -137,90 +137,95 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
           const progressFromEnd = index / filteredTransactions.length;
           const fadeDelay = progressFromEnd * 30; // Max 30 seconds
 
+          const shouldFadeOut = index < filteredTransactions.length - 10;
+
           return (
             <div 
               key={`transaction-${transaction.trans_num}-${index}`}
-              className={index >= filteredTransactions.length - 10 ? "" : "marker-fade-out"}
-              style={index >= filteredTransactions.length - 10 ? {} : {
-                animation: `fadeOut 30s ease-out forwards`,
-                animationDelay: `${fadeDelay}s`,
-              }}
             >
-              {/* Line connecting customer and merchant */}
-              <Polyline
-                positions={[customerPos, merchantPos]}
-                pathOptions={{
-                  color: isFraud ? "#ef4444" : "#22c55e",
-                  weight: isFraud ? 4 : 3,
-                  opacity: isFraud ? 0.9 : 0.8,
-                  dashArray: isFraud ? "8, 8" : "",
-                  lineCap: "round",
-                  lineJoin: "round",
-                }}
-              />
-
-              {/* Customer marker - red if fraud, blue if legitimate */}
-              <Marker position={customerPos} icon={isFraud ? customerFraudIcon : customerIcon}>
-                <Popup>
-                  <div className="text-sm space-y-2">
-                    <div>
-                      <strong>👤 Customer</strong>
-                      <br />
-                      📍 {transaction.city}, {transaction.state}
-                      <br />
-                      💼 {transaction.job}
-                      <br />
-                      {isFraud && <span className="text-red-600 font-semibold">🚨 FRAUDULENT TRANSACTION</span>}
-                    </div>
-                    {onSelectTransaction && (
-                      <Button
-                        onClick={() => onSelectTransaction(transaction)}
-                        size="sm"
-                        className="w-full"
-                        variant="default"
-                      >
-                        View Details
-                      </Button>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-
-              {/* Merchant marker (rosso/verde) */}
-              <Marker
-                position={merchantPos}
-                icon={isFraud ? merchantFraudIcon : merchantLegitIcon}
+              {/* Animated container for Polyline and Markers only (not Popup) */}
+              <div
+                style={shouldFadeOut ? {
+                  animation: `fadeOut 30s ease-out forwards`,
+                  animationDelay: `${fadeDelay}s`,
+                } : {}}
               >
-                <Popup>
-                  <div className="text-sm space-y-2">
-                    <div>
-                      <strong>🏪 {transaction.merchant}</strong>
-                      <br />
-                      📦 {transaction.category}
-                      <br />
-                      💳 ${transaction.amt.toFixed(2)}
-                      <br />
-                      🕐 {transaction.trans_time}
-                      <br />
-                      {isFraud ? (
-                        <span className="text-red-600 font-semibold">🚨 FRAUDULENT</span>
-                      ) : (
-                        <span className="text-green-600 font-semibold">✅ LEGITIMATE</span>
+                {/* Line connecting customer and merchant */}
+                <Polyline
+                  positions={[customerPos, merchantPos]}
+                  pathOptions={{
+                    color: isFraud ? "#ef4444" : "#22c55e",
+                    weight: isFraud ? 4 : 3,
+                    opacity: isFraud ? 0.9 : 0.8,
+                    dashArray: isFraud ? "8, 8" : "",
+                    lineCap: "round",
+                    lineJoin: "round",
+                  }}
+                />
+
+                {/* Customer marker - red if fraud, blue if legitimate */}
+                <Marker position={customerPos} icon={isFraud ? customerFraudIcon : customerIcon}>
+                  <Popup>
+                    <div className="text-sm space-y-2">
+                      <div>
+                        <strong>👤 Customer</strong>
+                        <br />
+                        📍 {transaction.city}, {transaction.state}
+                        <br />
+                        💼 {transaction.job}
+                        <br />
+                        {isFraud && <span className="text-red-600 font-semibold">🚨 FRAUDULENT TRANSACTION</span>}
+                      </div>
+                      {onSelectTransaction && (
+                        <Button
+                          onClick={() => onSelectTransaction(transaction)}
+                          size="sm"
+                          className="w-full"
+                          variant="default"
+                        >
+                          View Details
+                        </Button>
                       )}
                     </div>
-                    {onSelectTransaction && (
-                      <Button
-                        onClick={() => onSelectTransaction(transaction)}
-                        size="sm"
-                        className="w-full"
-                        variant="default"
-                      >
-                        View Details
-                      </Button>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
+                  </Popup>
+                </Marker>
+
+                {/* Merchant marker (rosso/verde) */}
+                <Marker
+                  position={merchantPos}
+                  icon={isFraud ? merchantFraudIcon : merchantLegitIcon}
+                >
+                  <Popup>
+                    <div className="text-sm space-y-2">
+                      <div>
+                        <strong>🏪 {transaction.merchant}</strong>
+                        <br />
+                        📦 {transaction.category}
+                        <br />
+                        💳 ${transaction.amt.toFixed(2)}
+                        <br />
+                        🕐 {transaction.trans_time}
+                        <br />
+                        {isFraud ? (
+                          <span className="text-red-600 font-semibold">🚨 FRAUDULENT</span>
+                        ) : (
+                          <span className="text-green-600 font-semibold">✅ LEGITIMATE</span>
+                        )}
+                      </div>
+                      {onSelectTransaction && (
+                        <Button
+                          onClick={() => onSelectTransaction(transaction)}
+                          size="sm"
+                          className="w-full"
+                          variant="default"
+                        >
+                          View Details
+                        </Button>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              </div>
             </div>
           );
         })}
