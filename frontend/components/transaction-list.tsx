@@ -42,16 +42,25 @@ export function TransactionList({
 
     // Apply search
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (tx) =>
-          tx.merchant?.toLowerCase().includes(query) ||
-          tx.category?.toLowerCase().includes(query) ||
-          tx.trans_num?.toLowerCase().includes(query) ||
-          tx.first?.toLowerCase().includes(query) ||
-          tx.last?.toLowerCase().includes(query) ||
-          tx.city?.toLowerCase().includes(query)
-      );
+      const query = searchQuery.toLowerCase().trim();
+      const queryWords = query.split(/\s+/);
+      
+      result = result.filter((tx) => {
+        // Combine multiple fields for comprehensive search
+        const fullName = `${tx.first || ""} ${tx.last || ""}`.toLowerCase();
+        const merchantName = tx.merchant?.toLowerCase() || "";
+        const categoryName = tx.category?.toLowerCase() || "";
+        const transNum = tx.trans_num?.toLowerCase() || "";
+        const city = tx.city?.toLowerCase() || "";
+        const state = tx.state?.toLowerCase() || "";
+        
+        // Combine all searchable fields
+        const searchableText = `${fullName} ${merchantName} ${categoryName} ${transNum} ${city} ${state}`;
+        
+        // Check if all query words exist in searchable text (AND logic)
+        // This allows "john doe" to find all transactions by John Doe
+        return queryWords.every(word => searchableText.includes(word));
+      });
     }
 
     // Apply sort
@@ -118,7 +127,7 @@ export function TransactionList({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search merchant, category, name, city..."
+            placeholder="Search: name, merchant, card, amount, city, state..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors"
@@ -311,20 +320,37 @@ export function TransactionList({
         <div className="flex-1 flex items-center justify-center text-slate-400">
           <div className="text-center space-y-2">
             <p className="font-medium">No transactions found</p>
-            <p className="text-sm">Try adjusting your search or filter criteria</p>
+            <p className="text-sm">
+              {searchQuery.trim() 
+                ? `Try adjusting your search "${searchQuery}" or filter criteria` 
+                : "Try adjusting your filter criteria"}
+            </p>
           </div>
         </div>
       ) : (
-        <div className="space-y-1 overflow-y-auto flex-1 pr-2">
-          {filteredAndSorted.map((transaction, index) => (
-            <TransactionCard
-              key={`${transaction.transaction_id}-${index}`}
-              transaction={transaction}
-              onClick={() => onSelectTransaction(transaction)}
-              threshold={threshold}
-            />
-          ))}
-        </div>
+        <>
+          {/* Results Info */}
+          <div className="flex items-center justify-between px-2 py-1.5 flex-shrink-0 text-xs text-slate-400 border-b border-slate-800">
+            <span>
+              Showing <span className="font-semibold text-slate-200">{filteredAndSorted.length}</span> transaction{filteredAndSorted.length !== 1 ? "s" : ""}
+              {searchQuery.trim() && <span> matching "<span className="text-slate-300">{searchQuery}</span>"</span>}
+            </span>
+            <span>
+              <span className="font-semibold text-slate-200">{fraudCount}</span> fraud cases • ${totalAmount.toFixed(2)}
+            </span>
+          </div>
+          
+          <div className="space-y-1 overflow-y-auto flex-1 pr-2">
+            {filteredAndSorted.map((transaction, index) => (
+              <TransactionCard
+                key={`${transaction.transaction_id}-${index}`}
+                transaction={transaction}
+                onClick={() => onSelectTransaction(transaction)}
+                threshold={threshold}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
