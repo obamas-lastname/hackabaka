@@ -8,36 +8,26 @@ Create a `.env` file in the project root (copy from `.env.example`):
 cp .env.example .env
 ```
 
-Edit `.env` with your actual configuration:
+The `.env` file contains API key, URLs, and processing configuration:
 
 ```env
 # API Authentication
 API_KEY=your_api_key_here
 
-# Hackathon API Endpoints
+# URLs Configuration
 STREAM_URL=https://95.217.75.14:8443/stream
 FLAG_URL=https://95.217.75.14:8443/api/flag
-
-# Local Backend
 LOCAL_PREDICT_URL=http://127.0.0.1:8000/predict?store=1
+FRONTEND_POST_URL=https://hackabaka.vercel.app/api/stream
 
-# Frontend (for development, use localhost; for production, use your domain)
-FRONTEND_POST_URL=http://localhost:3000/api/stream
-# FRONTEND_POST_URL=https://hackabaka.vercel.app/api/stream  # Production
-
-# Connection Settings
-VERIFY_TLS=false
-CONNECT_TIMEOUT=5
-READ_TIMEOUT=None
-REQ_TIMEOUT=10
-
-# Model & Processing
+# Processing Configuration
 MAX_WORKERS=4
 THRESHOLD=0.35
-PRINT_FEATURES=false
 ```
 
-**Important:** The `.env` file is git-ignored for security. Never commit API keys or sensitive data.
+For local development, you can override URLs as needed (e.g., `FRONTEND_POST_URL=http://localhost:3000/api/stream`).
+
+**Note:** The `.env` file is git-ignored for security. Never commit API keys or sensitive data.
 
 ### 2. Python Dependencies
 
