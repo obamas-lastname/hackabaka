@@ -9,15 +9,21 @@ interface TransactionContextType {
   addTransaction: (transaction: Transaction) => void;
   setTransactions: (transactions: Transaction[]) => void;
   clearTransactions: () => void;
+  isFrozen: boolean;
+  setIsFrozen: (frozen: boolean) => void;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
 export function TransactionProvider({ children }: { children: ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isFrozen, setIsFrozen] = useState(false);
 
   const addTransaction = (transaction: Transaction) => {
-    setTransactions((prev) => [transaction, ...prev]);
+    // Only add transaction if not frozen
+    if (!isFrozen) {
+      setTransactions((prev) => [transaction, ...prev]);
+    }
   };
 
   const clearTransactions = () => {
@@ -32,6 +38,10 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       },
       (error: any) => {
         console.error("[TransactionProvider] SSE error:", error);
+      },
+      () => {
+        // SSE disconnected - clear transactions
+        clearTransactions();
       }
     );
 
@@ -46,6 +56,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     addTransaction,
     setTransactions,
     clearTransactions,
+    isFrozen,
+    setIsFrozen,
   };
 
   return (

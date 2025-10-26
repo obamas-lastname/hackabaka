@@ -35,11 +35,10 @@ const TransactionDetailPanelContent = dynamic(
 );
 
 export default function DashboardPage() {
-  const { transactions } = useTransactionMemory();
+  const { transactions, isFrozen, setIsFrozen } = useTransactionMemory();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isFrozen, setIsFrozen] = useState(false);
 
   const handleSelectTransaction = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
