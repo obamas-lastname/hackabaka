@@ -16,18 +16,21 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Fraud Detection Dashboard",
+  description: "Real-time fraud detection dashboard with advanced analytics",
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/favicon.ico" },
-    ],
+    icon: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=2",
     apple: "/apple-touch-icon.png",
   },
   appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
     title: "GPF",
   },
   manifest: "/site.webmanifest",
+  other: {
+    "apple-mobile-web-app-title": "GPF",
+  },
 };
 
 export default function RootLayout({
