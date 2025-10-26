@@ -59,7 +59,7 @@ def hour_of_day(trans_time: str) -> int:
         return -1
 
 def dow_from_date(trans_date: str) -> int:
-    # 0=Mon .. 6=Sun
+    # 0=Mon,1=Tue, ... 6=Sun
     try:
         d = dtparser.parse(trans_date)
         return int(d.weekday())
@@ -73,9 +73,9 @@ def is_night_time(h: int) -> int:
 def safe_str(x) -> str:
     return "" if x is None else str(x)
 
-# ===========
-# DATABASE IO
-# ===========
+# ============
+# DATABASE I/O
+# ============
 
 def ensure_schema(conn: sqlite3.Connection):
     with conn:
@@ -271,7 +271,7 @@ def tx_to_features(tx: Dict[str, Any], conn: sqlite3.Connection) -> Dict[str, fl
     import math as _m
     log_amt = _m.log1p(amt)
 
-    # if both merchant and user coordinates exist, compute user_merchant_dist_km now
+    # If both merchant and user coordinates exist, compute user_merchant_dist_km now.
     user_merchant_dist_km = haversine_km(lat, lon, mlat, mlon) if None not in (lat, lon, mlat, mlon) else float("nan")
 
     feat = {

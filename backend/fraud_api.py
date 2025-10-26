@@ -15,7 +15,7 @@ DB_PATH = os.environ.get("FRAUD_DB", "../history.db")
 MODEL_PATH = os.environ.get("FRAUD_MODEL", "../model.pkl")
 FEATURES_PATH = os.environ.get("FRAUD_FEATURES", "features.json")
 
-app = FastAPI(title="Fraud API", version="1.0.2") # This must exist at top-level
+app = FastAPI(title="Fraud API", version="1.0.2") # This must exist at top-level.
 
 # =======
 # GLOBALS
@@ -68,18 +68,18 @@ def predict(
     if model is None or conn is None:
         raise HTTPException(status_code=503, detail="Model or DB not initialized.")
 
-    # Build features (using only past relative to tx['unix_time'])
+    # Build features (using only past relative to tx['unix_time']).
     feat_map = tx_to_features(tx, conn)
     X = np.array([ordered_feature_row(feat_map, feature_order)], dtype=float)
 
-    # Predict
+    # Predict.
     is_fraud = int(model.predict(X)[0])
     try:
         proba = float(model.predict_proba(X)[0, 1])
     except Exception:
         proba = None
 
-    # Optionally store this tx as history AFTER prediction
+    # Optionally store this tx as history AFTER prediction.
     if store:
         insert_tx(conn, tx)
 
