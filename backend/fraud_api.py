@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# fraud_api.py — FastAPI service for history-aware fraud predictions
 
 import os
 import json
@@ -16,10 +15,12 @@ DB_PATH = os.environ.get("FRAUD_DB", "../history.db")
 MODEL_PATH = os.environ.get("FRAUD_MODEL", "../model.pkl")
 FEATURES_PATH = os.environ.get("FRAUD_FEATURES", "features.json")
 
-# >>> THIS must exist at top-level <<<
-app = FastAPI(title="Fraud API", version="1.0.2")
+app = FastAPI(title="Fraud API", version="1.0.2") # This must exist at top-level
 
-# Globals
+# =======
+# GLOBALS
+# =======
+
 conn: Optional[sqlite3.Connection] = None
 model = None
 feature_order = FEATURE_ORDER

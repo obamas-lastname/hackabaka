@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# train_model.py (fast 80/20)
+
 import argparse, csv, json, sqlite3, os, sys
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier

@@ -1,10 +1,12 @@
-# features.py
 import math
 import sqlite3
 from typing import Dict, Any, List, Tuple, Optional
 from dateutil import parser as dtparser
 
-# ---------- helpers ----------
+# =======
+# HELPERS
+# =======
+
 def to_float(x) -> Optional[float]:
     try:
         if x is None or x == "":
@@ -71,7 +73,10 @@ def is_night_time(h: int) -> int:
 def safe_str(x) -> str:
     return "" if x is None else str(x)
 
-# ---------- DB IO ----------
+# ===========
+# DATABASE IO
+# ===========
+
 def ensure_schema(conn: sqlite3.Connection):
     with conn:
         conn.executescript(open("schema.sql", "r", encoding="utf-8").read())
@@ -181,7 +186,10 @@ def user_amount_stats(conn: sqlite3.Connection, cc_num: str, before_unix: int, w
         std = 0.0
     return mean, std
 
-# ---------- feature extraction ----------
+# ==================
+# FEATURE EXTRACTION
+# ==================
+
 FEATURE_ORDER = [
     # raw-ish numeric
     "age", "log_amt", "hour", "dow", "is_night",

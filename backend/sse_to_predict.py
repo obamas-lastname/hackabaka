@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-"""
-sse_to_predict.py — Final version (Frontend + Backend Integration)
 
+"""
 For each transaction:
   1. Reads from hackathon stream
   2. Predicts fraud locally via FastAPI (/predict?store=1)
   3. Flags to hackathon FLAG_URL
   4. Also POSTs full transaction (with model results) to your Next.js frontend
-
-Configuration: URLs and processing settings in .env file
 """
 
 import os
@@ -23,12 +20,9 @@ from dotenv import load_dotenv
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Load environment variables from .env file
-load_dotenv()
-
-# ============================================================
+# =======================
 # HARDCODED CONFIGURATION
-# ============================================================
+# =======================
 
 VERIFY_TLS = False
 CONNECT_TIMEOUT = 5
@@ -36,9 +30,12 @@ READ_TIMEOUT = None
 REQ_TIMEOUT = 10
 PRINT_FEATURES = False
 
-# ============================================================
+# ======================================================
 # CONFIGURATION (from .env) - API Key, URLs & Processing
-# ============================================================
+# ======================================================
+
+# Load environment variables from .env file
+load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
 STREAM_URL = os.getenv("STREAM_URL")
@@ -75,9 +72,9 @@ sess_flag = requests.Session()
 sess_predict = requests.Session()
 sess_frontend = requests.Session()
 
-# ============================================================
+# =======
 # HELPERS
-# ============================================================
+# =======
 
 def pretty(o):
     try:
@@ -166,9 +163,9 @@ def post_frontend_transaction(tx: dict, verdict: dict, flag_value: int):
         print(f"[FRONTEND] Error posting to {FRONTEND_POST_URL}: {e}")
         return None
 
-# ============================================================
+# ===========
 # MAIN WORKER
-# ============================================================
+# ===========
 
 def process_transaction(tx: dict):
     trans_num = tx.get("trans_num")
@@ -211,9 +208,9 @@ def process_transaction(tx: dict):
 
     print("-" * 80)
 
-# ============================================================
+# ===========
 # STREAM LOOP
-# ============================================================
+# ===========
 
 def run_stream():
     backoff = 1.0
@@ -256,9 +253,9 @@ def run_stream():
             time.sleep(backoff)
             backoff = min(backoff * 2, 15)
 
-# ============================================================
-# ENTRYPOINT
-# ============================================================
+# ====
+# MAIN
+# ====
 
 if __name__ == "__main__":
     print(f"Frontend POST URL: {FRONTEND_POST_URL}")
