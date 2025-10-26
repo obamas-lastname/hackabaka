@@ -61,16 +61,16 @@ npm run build
 
 ### Local Development (Manual)
 
-**Terminal 1 - Backend API:**
-```bash
-cd backend
-python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
-```
-
-**Terminal 2 - Frontend Dashboard:**
+**Terminal 1 - Frontend Dashboard:**
 ```bash
 cd frontend
 npm run start
+```
+
+**Terminal 2 - Backend API:**
+```bash
+cd backend
+python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
 ```
 
 **Terminal 3 - Stream Processor (reads from hackathon API & sends predictions):**
