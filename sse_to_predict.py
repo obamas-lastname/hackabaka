@@ -18,17 +18,21 @@ import urllib3
 import requests
 from sseclient import SSEClient
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # =========================
 # Config
 # =========================
-API_KEY = "85693b078643664d7ed495788f867daccc4121df8a7a71958647a64be942df47"
+API_KEY = os.getenv("API_KEY")
 
 STREAM_URL = "https://95.217.75.14:8443/stream"
 FLAG_URL = "https://95.217.75.14:8443/api/flag"
-LOCAL_PREDICT_URL = "http://127.0.0.1:8000/predict?store=1"
+LOCAL_PREDICT_URL = os.getenv("FASTAPI_URL")
 
 VERIFY_TLS = False
 CONNECT_TIMEOUT = 5
