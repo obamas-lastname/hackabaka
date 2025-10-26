@@ -1,0 +1,22 @@
+# Stream ingestor (Python)
+FROM python:3.11-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt sseclient-py
+
+# Only what the ingestor needs
+COPY sse_to_predict.py ./sse_to_predict.py
+
+ENV API_KEY=CHANGE_ME \
+    STREAM_URL=https://95.217.75.14:8443/stream \
+    FLAG_URL=https://95.217.75.14:8443/api/flag \
+    LOCAL_PREDICT_URL=http://api:8000/predict?store=1 \
+    FRONTEND_POST_URL=http://web:3000/api/stream \
+    VERIFY_TLS=0 \
+    THRESHOLD=0.35
+
+CMD ["python", "sse_to_predict.py"]

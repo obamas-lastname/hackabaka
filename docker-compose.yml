@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: hackabaka-api
+    environment:
+      FRAUD_DB: /data/history.db
+      FRAUD_MODEL: /models/model2.pkl
+      FRAUD_FEATURES: /models/features.json
+    volumes:
+      - db_data:/data
+      - model_data:/models
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.web
+    container_name: hackabaka-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  ingestor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ingestor
+    container_name: hackabaka-ingestor
+    environment:
+      API_KEY: ${API_KEY:-CHANGE_ME}
+      STREAM_URL: ${STREAM_URL:-https://95.217.75.14:8443/stream}
+      FLAG_URL: ${FLAG_URL:-https://95.217.75.14:8443/api/flag}
+      LOCAL_PREDICT_URL: ${LOCAL_PREDICT_URL:-http://api:8000/predict?store=1}
+      FRONTEND_POST_URL: ${FRONTEND_POST_URL:-http://web:3000/api/stream}
+      VERIFY_TLS: ${VERIFY_TLS:-0}
+      THRESHOLD: ${THRESHOLD:-0.35}
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  model_data:
