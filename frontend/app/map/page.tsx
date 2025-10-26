@@ -114,10 +114,10 @@ export default function FraudMapPage() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsCard
-              title="Last 100 Transactions"
+              title="Total Transactions"
               value={stats.total.toLocaleString()}
               icon={Activity}
-              description="Last 100 transactions processed"
+              description="Total transactions processed"
               variant="default"
             />
             <StatsCard
