@@ -9,7 +9,7 @@ pip install -r requirements.txt
 
 To train the AI model on a given CSV dataset:
 ```bash
-python3 train_model.py --input hackathon_train.csv --db history.db --output-model model.pkl --features features.json
+python3 backend/train_model.py --input hackathon_train.csv --db history.db --output-model model.pkl --features backend/features.json
 ```
 
 To build the frontend:
