@@ -31,7 +31,7 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="Optional: cap number of rows for quick runs")
     args = ap.parse_args()
 
-    # Fresh DB for clean, past-only history during feature construction
+    # Fresh DB for clean, past-only history during feature construction.
     if os.path.exists(args.db):
         os.remove(args.db)
     conn = sqlite3.connect(args.db)
@@ -87,7 +87,7 @@ def main():
     X = np.array(X_rows, dtype=float)
     y = np.array(y_rows, dtype=int)
 
-    # 80/20 split, stratified if possible
+    # Use a 80/20 split, stratified if possible.
     try:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.20, random_state=42, stratify=y
@@ -100,9 +100,9 @@ def main():
 
     # Faster RandomForest (good baseline)
     model = RandomForestClassifier(
-        n_estimators=120,      # fewer trees = faster
-        max_depth=16,          # constrain depth for speed/generalization
-        min_samples_leaf=2,    # small regularization + speed
+        n_estimators=120,      # Tress
+        max_depth=16,          # Constrain depth for speed/generalization
+        min_samples_leaf=2,    # Small regularization + speed
         n_jobs=-1,
         random_state=42,
         class_weight="balanced_subsample"
