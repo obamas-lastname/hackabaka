@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { useTransactionMemory } from "@/lib/transaction-context";
 import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
@@ -24,6 +25,7 @@ type Tx = {
 };
 
 export default function TransactionsChartPage() {
+  const { addTransaction } = useTransactionMemory();
   // We'll maintain a sliding window (in seconds) of counts per second for fraud/legit.
   const WINDOW_SECONDS = 120; // show last 120 seconds
   const [chartData, setChartData] = useState<Array<{ time: string; ts: number; legit: number; fraud: number }>>([]);
@@ -51,6 +53,7 @@ export default function TransactionsChartPage() {
     const unsub = SSEClient(
       (d: any) => {
         try {
+          addTransaction(d);
           pushTxToCounts(d);
         } catch (e) {
           console.error("Error processing tx for TPS", e);

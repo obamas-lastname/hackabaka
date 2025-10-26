@@ -87,7 +87,7 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative w-full h-full ${className}`} style={{ minHeight: "100%" }}>
       <style>{`
         @keyframes pulse {
           0%, 100% {
@@ -99,19 +99,20 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
         }
       `}</style>
       
-      <MapContainer
-        center={center}
-        zoom={4}
-        style={{ height: "100%", width: "100%", zIndex: 0 }}
-        className="rounded-lg"
-      >
+      <div style={{ width: "100%", height: "100%" }}>
+        <MapContainer
+          center={center}
+          zoom={4}
+          style={{ height: "100%", width: "100%", zIndex: 0 }}
+          className="rounded-lg"
+        >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
         {/* Render all transactions */}
-        {filteredTransactions.map((transaction) => {
+        {filteredTransactions.map((transaction, index) => {
           // Customer position
           const customerPos: [number, number] = [transaction.lat, transaction.long];
           
@@ -130,7 +131,7 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
           });
 
           return (
-            <div key={`transaction-${transaction.trans_num}`}>
+            <div key={`transaction-${transaction.trans_num}-${index}`}>
               {/* Line connecting customer and merchant */}
               <Polyline
                 positions={[customerPos, merchantPos]}
@@ -244,6 +245,7 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
             <span>Legitimate Line</span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

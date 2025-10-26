@@ -35,6 +35,15 @@ export function TransactionDetailPanel({
 
   const isFraud = transaction.is_fraud === 1;
 
+  // Format gender with emoji
+  const getGenderDisplay = (gender: string | undefined) => {
+    if (!gender) return 'N/A';
+    const genderLower = gender.toLowerCase();
+    if (genderLower.includes('m') || genderLower === 'male') return 'Male';
+    if (genderLower.includes('f') || genderLower === 'female') return 'Female';
+    return gender;
+  };
+
   const InfoField = ({ label, value }: { label: string; value: string | number }) => (
     <div>
       <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-1">{label}</p>
@@ -100,7 +109,7 @@ export function TransactionDetailPanel({
           <div className="space-y-2.5">
             <InfoField label="Name" value={`${transaction.first || ''} ${transaction.last || ''}`} />
             <InfoField label="Date of Birth" value={transaction.dob || 'N/A'} />
-            <InfoField label="Gender" value={transaction.gender || 'N/A'} />
+            <InfoField label="Gender" value={getGenderDisplay(transaction.gender)} />
             <InfoField label="Job" value={transaction.job || 'N/A'} />
             <InfoField label="SSN" value={transaction.ssn || 'N/A'} />
             <div className="pt-1">
@@ -121,7 +130,6 @@ export function TransactionDetailPanel({
             <InfoField label="Card Number" value={`${transaction.cc_num ? String(transaction.cc_num) : 'N/A'}`} />
             <InfoField label="Account" value={transaction.acct_num || 'N/A'} />
             <InfoField label="Transaction ID" value={transaction.trans_num || 'N/A'} />
-            <InfoField label="Profile" value={transaction.profile || 'N/A'} />
           </div>
         </div>
       </div>

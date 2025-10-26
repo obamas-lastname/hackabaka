@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ui/theme-provider"
+import { TransactionProvider } from "@/lib/transaction-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,7 +32,20 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <TransactionProvider>
+              <div className="flex flex-col min-h-screen">
+                {children}
+                
+                {/* Footer */}
+                <footer className="border-t border-border bg-background/40 backdrop-blur-sm">
+                  <div className="px-4 md:px-8 py-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Made with <span className="text-red-500">❤️</span> by <span className="font-semibold">Git Push Force Team</span> during <span className="font-semibold">EESTEC Olympics 13</span>
+                    </p>
+                  </div>
+                </footer>
+              </div>
+            </TransactionProvider>
           </ThemeProvider>
       </body>
     </html>

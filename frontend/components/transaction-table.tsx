@@ -29,7 +29,6 @@ export type Transaction = {
   job: string;
   dob: string;
   acct_num: string;
-  profile: string;
   trans_num: string;
   trans_date: string;
   trans_time: string;

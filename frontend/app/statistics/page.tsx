@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { useTransactionMemory } from "@/lib/transaction-context";
 import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
@@ -49,12 +50,28 @@ function formatAmount(amount: number): string {
 }
 
 export default function StatisticsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { transactions, addTransaction } = useTransactionMemory();
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [categoryStats, setCategoryStats] = useState<CategoryStats[]>([]);
 
   // Keep a map of the last 5-second windows for efficient updates
   const windowsRef = useRef<Map<number, TimeSeriesData>>(new Map());
+
+  // Connect to SSE
+  useEffect(() => {
+    const cleanup = SSEClient(
+      (transaction: Transaction) => {
+        addTransaction(transaction);
+      },
+      (err: any) => {
+        console.error("SSE Error:", err);
+      }
+    );
+
+    return () => {
+      cleanup();
+    };
+  }, []);
 
   // Update time series data on transaction change (instead of polling)
   useEffect(() => {

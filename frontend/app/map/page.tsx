@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTransactionMemory } from "@/lib/transaction-context";
 import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,16 +47,9 @@ const TransactionDetailPanelContent = dynamic(
 );
 
 export default function FraudMapPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const { transactions, addTransaction } = useTransactionMemory();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [stats, setStats] = useState({
-    total: 0,
-    fraud: 0,
-    legitimate: 0,
-    fraudRate: 0,
-  });
   const [showOnlyFraud, setShowOnlyFraud] = useState(false);
 
   const handleSelectTransaction = (transaction: Transaction) => {
@@ -63,37 +57,26 @@ export default function FraudMapPage() {
     setIsDialogOpen(true);
   };
 
+  // Calculate displayed transactions once
+  const displayedTransactions = transactions.slice(0, 100);
+  const displayedFraudTransactions = displayedTransactions.filter((t: Transaction) => t.is_fraud === 1);
+  const transactionsToShow = showOnlyFraud ? displayedFraudTransactions : displayedTransactions;
+  const displayCount = transactionsToShow.length;
+  const totalCount = showOnlyFraud ? transactions.filter((t: Transaction) => t.is_fraud === 1).length : transactions.length;
+
+  // Calculate stats from all transactions (non-limited to 100)
+  const stats = {
+    total: transactions.length,
+    fraud: transactions.filter((t: Transaction) => t.is_fraud === 1).length,
+    legitimate: transactions.filter((t: Transaction) => t.is_fraud === 0).length,
+    fraudRate: transactions.length > 0 ? (transactions.filter((t: Transaction) => t.is_fraud === 1).length / transactions.length) * 100 : 0,
+  };
+
   useEffect(() => {
     const cleanup = SSEClient(
       (transaction: Transaction) => {
-        console.log("Received transaction in fraud-map page:", transaction);
-        
-        setTransactions((prev) => {
-          const updated = [transaction, ...prev.slice(0, 49)]; // Keep last 50
-          return updated;
-        });
-
-        // Keep recent transactions for the map - simpler approach
-        setRecentTransactions((prev) => {
-          const updated = [transaction, ...prev].slice(0, 50); // Keep last 50 transactions
-          console.log("Recent transactions count:", updated.length);
-          return updated;
-        });
-
-        // Update stats
-        setStats((prev) => {
-          const total = prev.total + 1;
-          const fraud = prev.fraud + (transaction.is_fraud === 1 ? 1 : 0);
-          const legitimate = prev.legitimate + (transaction.is_fraud === 0 ? 1 : 0);
-          const fraudRate = total > 0 ? (fraud / total) * 100 : 0;
-          
-          return {
-            total,
-            fraud,
-            legitimate,
-            fraudRate,
-          };
-        });
+        console.log("Received transaction in map page:", transaction);
+        addTransaction(transaction);
       },
       (err: any) => {
         console.error("SSE Error:", err);
@@ -120,7 +103,7 @@ export default function FraudMapPage() {
                   Live Transaction Map
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Real-time visualization of transactions with pulse effects • Showing {showOnlyFraud ? recentTransactions.filter(t => t.is_fraud === 1).length : recentTransactions.length} active transactions
+                  Real-time visualization of transactions with pulse effects • Showing {displayCount} of {totalCount} transactions
                 </p>
               </div>
               <Button
@@ -135,7 +118,7 @@ export default function FraudMapPage() {
             </div>
             <div className="h-[600px] relative">
               <FraudMap 
-                transactions={recentTransactions} 
+                transactions={transactionsToShow} 
                 className="h-full w-full" 
                 showOnlyFraud={showOnlyFraud}
                 onSelectTransaction={handleSelectTransaction}
@@ -146,10 +129,10 @@ export default function FraudMapPage() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsCard
-              title="Total Transactions"
+              title="Last 100 Transactions"
               value={stats.total.toLocaleString()}
               icon={Activity}
-              description="All transactions processed"
+              description="Last 100 transactions processed"
               variant="default"
             />
             <StatsCard

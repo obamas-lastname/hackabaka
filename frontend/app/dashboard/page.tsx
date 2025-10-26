@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Transaction } from "@/components/transaction-table";
 import { TransactionList } from "@/components/transaction-list";
+import { useTransactionMemory } from "@/lib/transaction-context";
 import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
@@ -35,7 +36,7 @@ const TransactionDetailPanelContent = dynamic(
 );
 
 export default function DashboardPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { transactions, addTransaction } = useTransactionMemory();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export default function DashboardPage() {
       (data: Transaction) => {
         // Only add new transaction if not frozen
         if (!isFrozen) {
-          setTransactions((prev) => [data, ...prev]);
+          addTransaction(data);
         }
       },
       (error: any) => {
@@ -67,10 +68,11 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <>
+      <div className="h-screen bg-background flex flex-col">
         <Header />
       
-      <main className="w-full flex-1 flex gap-4 overflow-hidden p-4">
+        <main className="w-full flex-1 flex gap-4 overflow-hidden p-4">
         {/* Left: Transaction List */}
         <div className="flex-1 flex flex-col overflow-hidden space-y-3">
           {/* Error Alert */}
@@ -133,7 +135,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Average Transaction Amount */}
-              <div className="flex flex-col gap-1 p-3 bg-green-100/50 dark:bg-green-950/20 rounded-lg border border-green-500/30 hover:border-green-500/50 transition-colors">
+              <div className="flex flex-col gap-1 p-3 bg-blue-100/50 dark:bg-blue-950/20 rounded-lg border border-blue-500/30 hover:border-blue-500/50 transition-colors">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground font-medium">Avg Amount</span>
                   <DollarSign className="h-4 w-4 text-green-600" />
@@ -160,13 +162,13 @@ export default function DashboardPage() {
 
               {/* Legitimate vs Fraudulent */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-1 p-2 bg-blue-100/30 dark:bg-blue-950/20 rounded-lg border border-blue-500/30">
+                <div className="flex flex-col gap-1 p-2 bg-green-100/30 dark:bg-green-950/20 rounded-lg border border-green-500/30 hover:border-green-500/50 transition ease-in-out duration-200">
                   <span className="text-xs text-muted-foreground font-medium">Legitimate</span>
-                  <span className="font-bold text-lg text-blue-600">
+                  <span className="font-bold text-lg text-green-600">
                     {transactions.filter((tx) => tx.is_fraud === 0).length}
                   </span>
                 </div>
-                <div className="flex flex-col gap-1 p-2 bg-red-100/30 dark:bg-red-950/20 rounded-lg border border-red-500/30">
+                <div className="flex flex-col gap-1 p-2 bg-red-100/30 dark:bg-red-950/20 rounded-lg border border-red-500/30 hover:border-red-500/50 transition ease-in-out duration-200">
                   <span className="text-xs text-muted-foreground font-medium">Fraudulent</span>
                   <span className="font-bold text-lg text-red-600">
                     {transactions.filter((tx) => tx.is_fraud === 1).length}
@@ -193,6 +195,7 @@ export default function DashboardPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </>
   );
 }

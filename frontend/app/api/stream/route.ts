@@ -82,7 +82,6 @@ export async function POST(request: NextRequest) {
       job: payload.job || 'Unknown',
       dob: payload.dob || '1990-01-01',
       acct_num: payload.acct_num || '',
-      profile: payload.profile || '',
       trans_num: payload.trans_num || `TRANS-${Date.now()}`,
       trans_date: payload.trans_date || new Date().toISOString().split('T')[0],
       trans_time: payload.trans_time || new Date().toISOString().split('T')[1].substring(0, 8),
