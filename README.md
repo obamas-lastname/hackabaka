@@ -67,15 +67,15 @@ cd backend
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
 ```
 
-**Terminal 2 - Stream Processor (reads from hackathon API & sends predictions):**
-```bash
-python3 sse_to_predict.py
-```
-
-**Terminal 3 - Frontend Dashboard:**
+**Terminal 2 - Frontend Dashboard:**
 ```bash
 cd frontend
-npm run dev
+npm run start
+```
+
+**Terminal 3 - Stream Processor (reads from hackathon API & sends predictions):**
+```bash
+python3 sse_to_predict.py
 ```
 
 The dashboard will be available at `http://localhost:3000`
