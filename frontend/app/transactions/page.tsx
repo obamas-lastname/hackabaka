@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useTransactionMemory } from "@/lib/transaction-context";
-import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ type Tx = {
 };
 
 export default function TransactionsChartPage() {
-  const { addTransaction } = useTransactionMemory();
+  const { transactions } = useTransactionMemory();
   // We'll maintain a sliding window (in seconds) of counts per second for fraud/legit.
   const WINDOW_SECONDS = 120; // show last 120 seconds
   const [chartData, setChartData] = useState<Array<{ time: string; ts: number; legit: number; fraud: number }>>([]);
@@ -48,45 +47,38 @@ export default function TransactionsChartPage() {
     map.set(ts, cur);
   }
 
+  // When a new transaction arrives, update the counts
   useEffect(() => {
-    // SSE subscription
-    const unsub = SSEClient(
-      (d: any) => {
-        try {
-          addTransaction(d);
-          pushTxToCounts(d);
-        } catch (e) {
-          console.error("Error processing tx for TPS", e);
-        }
-      },
-      (err: any) => {
-        console.error("SSE Error (chart):", err);
-      }
-    );
+    if (transactions.length === 0) return;
+    // Update counts with the latest transaction
+    pushTxToCounts(transactions[0]);
+  }, [transactions]);
 
-    function tickOnce() {
-      const now = Math.floor(Date.now() / 1000);
-      const map = countsRef.current;
+  function tickOnce() {
+    const now = Math.floor(Date.now() / 1000);
+    const map = countsRef.current;
 
-      // ensure current second exists (so chart pulses even with zero activity)
-      if (!map.has(now)) map.set(now, { legit: 0, fraud: 0 });
+    // ensure current second exists (so chart pulses even with zero activity)
+    if (!map.has(now)) map.set(now, { legit: 0, fraud: 0 });
 
-      // build data for last WINDOW_SECONDS seconds
-      const entries: Array<{ ts: number; legit: number; fraud: number }> = [];
-      for (let s = now - (WINDOW_SECONDS - 1); s <= now; s++) {
-        const v = map.get(s) || { legit: 0, fraud: 0 };
-        entries.push({ ts: s, legit: v.legit, fraud: v.fraud });
-      }
-
-      // trim map to only recent keys to avoid memory growth
-      for (const key of Array.from(map.keys())) {
-        if (key < now - WINDOW_SECONDS) map.delete(key);
-      }
-
-      // set chart data (ascending by time)
-      setChartData(entries.map((e) => ({ time: new Date(e.ts * 1000).toLocaleTimeString(), ts: e.ts, legit: e.legit, fraud: e.fraud })));
+    // build data for last WINDOW_SECONDS seconds
+    const entries: Array<{ ts: number; legit: number; fraud: number }> = [];
+    for (let s = now - (WINDOW_SECONDS - 1); s <= now; s++) {
+      const v = map.get(s) || { legit: 0, fraud: 0 };
+      entries.push({ ts: s, legit: v.legit, fraud: v.fraud });
     }
 
+    // trim map to only recent keys to avoid memory growth
+    for (const key of Array.from(map.keys())) {
+      if (key < now - WINDOW_SECONDS) map.delete(key);
+    }
+
+    // set chart data (ascending by time)
+    setChartData(entries.map((e) => ({ time: new Date(e.ts * 1000).toLocaleTimeString(), ts: e.ts, legit: e.legit, fraud: e.fraud })));
+  }
+
+  // Setup ticker
+  useEffect(() => {
     // start ticker unless paused
     if (!paused) {
       intervalRef.current = window.setInterval(tickOnce, 1000) as unknown as number;
@@ -99,9 +91,6 @@ export default function TransactionsChartPage() {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      try {
-        unsub();
-      } catch {}
     };
   }, [paused]);
 

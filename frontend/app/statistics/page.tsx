@@ -13,7 +13,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useTransactionMemory } from "@/lib/transaction-context";
-import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
 import { Transaction } from "@/components/transaction-table";
@@ -36,6 +35,53 @@ type CategoryStats = {
   legitimateCount: number;
 };
 
+type AgeGroupStats = {
+  ageGroup: string;
+  fraudCount: number;
+  legitimateCount: number;
+};
+
+type AmountRangeStats = {
+  range: string;
+  fraudCount: number;
+  legitimateCount: number;
+  minAmount: number;
+  maxAmount: number;
+};
+
+type StateStats = {
+  state: string;
+  fraudCount: number;
+  legitimateCount: number;
+};
+
+// Helper function to calculate age from DOB
+function calculateAge(dob: string): number {
+  try {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  } catch {
+    return 0;
+  }
+}
+
+// Helper function to get age group from age
+function getAgeGroup(age: number): string {
+  if (age < 18) return "< 18";
+  if (age < 25) return "18-24";
+  if (age < 35) return "25-34";
+  if (age < 45) return "35-44";
+  if (age < 55) return "45-54";
+  if (age < 65) return "55-64";
+  return "65+";
+}
+
 // Helper function to format amounts dynamically
 function formatAmount(amount: number): string {
   if (amount >= 1_000_000_000) {
@@ -50,28 +96,14 @@ function formatAmount(amount: number): string {
 }
 
 export default function StatisticsPage() {
-  const { transactions, addTransaction } = useTransactionMemory();
+  const { transactions } = useTransactionMemory();
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [categoryStats, setCategoryStats] = useState<CategoryStats[]>([]);
+  const [ageGroupStats, setAgeGroupStats] = useState<AgeGroupStats[]>([]);
+  const [stateStats, setStateStats] = useState<StateStats[]>([]);
 
   // Keep a map of the last 5-second windows for efficient updates
   const windowsRef = useRef<Map<number, TimeSeriesData>>(new Map());
-
-  // Connect to SSE
-  useEffect(() => {
-    const cleanup = SSEClient(
-      (transaction: Transaction) => {
-        addTransaction(transaction);
-      },
-      (err: any) => {
-        console.error("SSE Error:", err);
-      }
-    );
-
-    return () => {
-      cleanup();
-    };
-  }, []);
 
   // Update time series data on transaction change (instead of polling)
   useEffect(() => {
@@ -151,6 +183,62 @@ export default function StatisticsPage() {
     setCategoryStats(Object.values(categories).sort((a, b) => 
       (b.fraudCount + b.legitimateCount) - (a.fraudCount + a.legitimateCount)
     ).slice(0, 10)); // Top 10 categories
+  }, [transactions]);
+
+  // Update age group stats
+  useEffect(() => {
+    const ageGroups: Record<string, AgeGroupStats> = {
+      "< 18": { ageGroup: "< 18", fraudCount: 0, legitimateCount: 0 },
+      "18-24": { ageGroup: "18-24", fraudCount: 0, legitimateCount: 0 },
+      "25-34": { ageGroup: "25-34", fraudCount: 0, legitimateCount: 0 },
+      "35-44": { ageGroup: "35-44", fraudCount: 0, legitimateCount: 0 },
+      "45-54": { ageGroup: "45-54", fraudCount: 0, legitimateCount: 0 },
+      "55-64": { ageGroup: "55-64", fraudCount: 0, legitimateCount: 0 },
+      "65+": { ageGroup: "65+", fraudCount: 0, legitimateCount: 0 },
+    };
+
+    transactions.forEach((tx) => {
+      const age = calculateAge(tx.dob || "1990-01-01");
+      const group = getAgeGroup(age);
+      
+      if (tx.is_fraud === 1) {
+        ageGroups[group].fraudCount += 1;
+      } else {
+        ageGroups[group].legitimateCount += 1;
+      }
+    });
+
+    setAgeGroupStats(Object.values(ageGroups));
+  }, [transactions]);
+
+  // Update state stats
+  useEffect(() => {
+    const states: Record<string, StateStats> = {};
+
+    transactions.forEach((tx) => {
+      const state = tx.state || "Unknown";
+      if (!states[state]) {
+        states[state] = {
+          state: state,
+          fraudCount: 0,
+          legitimateCount: 0,
+        };
+      }
+
+      if (tx.is_fraud === 1) {
+        states[state].fraudCount += 1;
+      } else {
+        states[state].legitimateCount += 1;
+      }
+    });
+
+    // Sort by total transactions and take top 15
+    setStateStats(Object.values(states)
+      .sort((a, b) => 
+        (b.fraudCount + b.legitimateCount) - (a.fraudCount + a.legitimateCount)
+      )
+      .slice(0, 15)
+    );
   }, [transactions]);
 
   // Calculate stats
@@ -313,6 +401,49 @@ export default function StatisticsPage() {
                 </ResponsiveContainer>
               </ChartContainer>
             </Card>
+
+            {/* Age Group Distribution Chart */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Fraud by Age Group</h3>
+              <ChartContainer config={categoryChartConfig} className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={ageGroupStats}
+                    margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                    <XAxis dataKey="ageGroup" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <ChartTooltip />
+                    <ChartLegend />
+                    <Bar dataKey="legitimateCount" fill="#22c55e" name="Legitimate" stackId="a" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="fraudCount" fill="#ef4444" name="Fraudulent" stackId="a" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </Card>
+
+            {/* Top States by Fraud Chart */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Top States by Fraud</h3>
+              <ChartContainer config={categoryChartConfig} className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={stateStats}
+                    margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                    layout="vertical"
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                    <XAxis type="number" tick={{ fontSize: 12 }} />
+                    <YAxis dataKey="state" type="category" width={40} tick={{ fontSize: 11 }} />
+                    <ChartTooltip />
+                    <ChartLegend />
+                    <Bar dataKey="legitimateCount" fill="#22c55e" name="Legitimate" stackId="a" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="fraudCount" fill="#ef4444" name="Fraudulent" stackId="a" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </Card>
           </div>
 
           {/* Detailed Stats Table */}
@@ -341,6 +472,53 @@ export default function StatisticsPage() {
                         </td>
                         <td className="text-right py-3 px-4 text-red-600 dark:text-red-400">
                           {cat.fraudCount}
+                        </td>
+                        <td className="text-right py-3 px-4 font-semibold">{total}</td>
+                        <td className="text-right py-3 px-4">
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                              parseFloat(fraudPercent) > 5
+                                ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+                                : "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+                            }`}
+                          >
+                            {fraudPercent}%
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Age Group Statistics Table */}
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Age Group Statistics</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 font-semibold">Age Group</th>
+                    <th className="text-right py-3 px-4 font-semibold">Legitimate</th>
+                    <th className="text-right py-3 px-4 font-semibold">Fraudulent</th>
+                    <th className="text-right py-3 px-4 font-semibold">Total</th>
+                    <th className="text-right py-3 px-4 font-semibold">Fraud %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ageGroupStats.map((ageGroup) => {
+                    const total = ageGroup.legitimateCount + ageGroup.fraudCount;
+                    const fraudPercent = total > 0 ? ((ageGroup.fraudCount / total) * 100).toFixed(1) : "0";
+                    return (
+                      <tr key={ageGroup.ageGroup} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                        <td className="py-3 px-4 font-medium">{ageGroup.ageGroup}</td>
+                        <td className="text-right py-3 px-4 text-green-600 dark:text-green-400">
+                          {ageGroup.legitimateCount}
+                        </td>
+                        <td className="text-right py-3 px-4 text-red-600 dark:text-red-400">
+                          {ageGroup.fraudCount}
                         </td>
                         <td className="text-right py-3 px-4 font-semibold">{total}</td>
                         <td className="text-right py-3 px-4">

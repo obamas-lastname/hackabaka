@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useTransactionMemory } from "@/lib/transaction-context";
-import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -47,7 +46,7 @@ const TransactionDetailPanelContent = dynamic(
 );
 
 export default function FraudMapPage() {
-  const { transactions, addTransaction } = useTransactionMemory();
+  const { transactions } = useTransactionMemory();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showOnlyFraud, setShowOnlyFraud] = useState(false);
@@ -72,21 +71,7 @@ export default function FraudMapPage() {
     fraudRate: transactions.length > 0 ? (transactions.filter((t: Transaction) => t.is_fraud === 1).length / transactions.length) * 100 : 0,
   };
 
-  useEffect(() => {
-    const cleanup = SSEClient(
-      (transaction: Transaction) => {
-        console.log("Received transaction in map page:", transaction);
-        addTransaction(transaction);
-      },
-      (err: any) => {
-        console.error("SSE Error:", err);
-      }
-    );
 
-    return () => {
-      cleanup();
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

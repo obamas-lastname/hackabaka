@@ -31,7 +31,7 @@ API_KEY = "85693b078643664d7ed495788f867daccc4121df8a7a71958647a64be942df47"
 STREAM_URL = "https://95.217.75.14:8443/stream"
 FLAG_URL = "https://95.217.75.14:8443/api/flag"
 LOCAL_PREDICT_URL = "http://127.0.0.1:8000/predict?store=1"
-FRONTEND_POST_URL = "http://localhost:3000/api/stream"
+FRONTEND_POST_URL = "https://hackabaka.vercel.app/api/stream"
 
 VERIFY_TLS = False
 CONNECT_TIMEOUT = 5

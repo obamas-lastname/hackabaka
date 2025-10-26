@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Transaction } from "@/components/transaction-table";
 import { TransactionList } from "@/components/transaction-list";
 import { useTransactionMemory } from "@/lib/transaction-context";
-import { SSEClient } from "@/lib/sse-client";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
 import { Button } from "@/components/ui/button";
@@ -36,31 +35,11 @@ const TransactionDetailPanelContent = dynamic(
 );
 
 export default function DashboardPage() {
-  const { transactions, addTransaction } = useTransactionMemory();
+  const { transactions } = useTransactionMemory();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFrozen, setIsFrozen] = useState(false);
-
-  useEffect(() => {
-    // Connect to local SSE stream
-    const unsubscribe = SSEClient(
-      (data: Transaction) => {
-        // Only add new transaction if not frozen
-        if (!isFrozen) {
-          addTransaction(data);
-        }
-      },
-      (error: any) => {
-        console.error("SSE Error:", error);
-        setError("Connection lost");
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, [isFrozen]);
 
   const handleSelectTransaction = (transaction: Transaction) => {
     setSelectedTransaction(transaction);

@@ -5,6 +5,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Transaction } from "./transaction-table";
 import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
 
 // Fix for default marker icons in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -19,6 +20,7 @@ interface FraudMapProps {
   className?: string;
   showOnlyFraud?: boolean;
   onSelectTransaction?: (transaction: Transaction) => void;
+  maxMarkers?: number;
 }
 
 // Custom icons using SVG for better rendering
@@ -66,14 +68,19 @@ const merchantLegitIcon = new L.DivIcon({
   iconAnchor: [12, 12],
 });
 
-export function FraudMap({ transactions, className = "", showOnlyFraud = false, onSelectTransaction }: FraudMapProps) {
+export function FraudMap({ transactions, className = "", showOnlyFraud = false, onSelectTransaction, maxMarkers = 100 }: FraudMapProps) {
   // Center of USA
   const center: [number, number] = [39.8283, -98.5795];
 
   // Filter transactions if needed
-  const filteredTransactions = showOnlyFraud 
-    ? transactions.filter(t => t.is_fraud === 1)
-    : transactions;
+  const filteredTransactions = useMemo(() => {
+    const filtered = showOnlyFraud 
+      ? transactions.filter(t => t.is_fraud === 1)
+      : transactions;
+    
+    // Keep only latest maxMarkers
+    return filtered.slice(0, maxMarkers);
+  }, [transactions, showOnlyFraud, maxMarkers]);
 
   console.log("FraudMap rendering with transactions:", filteredTransactions.length);
   if (filteredTransactions.length > 0) {
@@ -96,6 +103,19 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
           50% {
             opacity: 0.5;
           }
+        }
+        
+        @keyframes fadeOut {
+          0% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0.2;
+          }
+        }
+        
+        .marker-fade-out {
+          animation: fadeOut 30s ease-out forwards;
         }
       `}</style>
       
@@ -123,15 +143,27 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
           ];
 
           const isFraud = transaction.is_fraud === 1;
+          
+          // Calculate fade-out delay based on position (oldest markers fade out first)
+          const progressFromEnd = index / filteredTransactions.length;
+          const fadeDelay = progressFromEnd * 30; // Max 30 seconds
 
           console.log(`Rendering transaction ${transaction.trans_num}:`, {
             customerPos,
             merchantPos,
             isFraud,
+            fadeDelay,
           });
 
           return (
-            <div key={`transaction-${transaction.trans_num}-${index}`}>
+            <div 
+              key={`transaction-${transaction.trans_num}-${index}`}
+              className={index >= filteredTransactions.length - 10 ? "" : "marker-fade-out"}
+              style={index >= filteredTransactions.length - 10 ? {} : {
+                animation: `fadeOut 30s ease-out forwards`,
+                animationDelay: `${fadeDelay}s`,
+              }}
+            >
               {/* Line connecting customer and merchant */}
               <Polyline
                 positions={[customerPos, merchantPos]}
@@ -215,6 +247,10 @@ export function FraudMap({ transactions, className = "", showOnlyFraud = false, 
       {/* Legend */}
       <div className="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg z-[1000]">
         <h3 className="text-sm font-semibold mb-3">Legend</h3>
+        <div className="mb-3 pb-3 border-b border-border text-xs text-slate-400">
+          <div className="font-semibold text-foreground">Showing {filteredTransactions.length} / {maxMarkers} markers</div>
+          <div className="text-xs mt-1">Fade out over 30 seconds</div>
+        </div>
         <div className="space-y-2 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-400 border border-white"></div>

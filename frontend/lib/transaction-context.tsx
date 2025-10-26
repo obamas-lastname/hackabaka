@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Transaction } from "@/components/transaction-table";
+import { SSEClient } from "./sse-client";
 
 interface TransactionContextType {
   transactions: Transaction[];
@@ -22,6 +23,27 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const clearTransactions = () => {
     setTransactions([]);
   };
+
+  // Initialize SSE connection ONCE when provider mounts
+  useEffect(() => {
+    console.log("[TransactionProvider] Connecting to SSE stream...");
+    
+    const cleanup = SSEClient(
+      (transaction: Transaction) => {
+        console.log("[TransactionProvider] Received transaction:", transaction.trans_num);
+        addTransaction(transaction);
+      },
+      (error: any) => {
+        console.error("[TransactionProvider] SSE error:", error);
+      }
+    );
+
+    // Cleanup function closes the SSE connection when provider unmounts
+    return () => {
+      console.log("[TransactionProvider] Closing SSE stream");
+      cleanup();
+    };
+  }, []); // Empty dependency array - only run once
 
   const value: TransactionContextType = {
     transactions,

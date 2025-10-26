@@ -112,6 +112,8 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -119,4 +121,32 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Recharts Tooltip Styling */
+.recharts-tooltip-wrapper {
+  background-color: rgb(30, 30, 30) !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.recharts-tooltip-cursor {
+  stroke: currentColor;
+  opacity: 0.5;
+}
+
+.recharts-default-tooltip {
+  background-color: rgb(30, 30, 30) !important;
+  border: 1px solid rgb(60, 60, 60) !important;
+  border-radius: 0.5rem;
+}
+
+.recharts-tooltip-label {
+  color: rgb(220, 220, 220);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.recharts-tooltip-item {
+  color: rgb(220, 220, 220);
 }
