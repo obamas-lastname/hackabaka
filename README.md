@@ -59,6 +59,8 @@ npm run build
 
 ## Launch Backend & Frontend
 
+The following terminals and their respective commands should be run in the given order.
+
 **Terminal 1 - Frontend Dashboard:**
 ```bash
 cd frontend
