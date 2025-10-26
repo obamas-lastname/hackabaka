@@ -4,4 +4,27 @@ venv/
 *.pkl
 *.db
 .env
+.env.local
+.env.*.local
 .ipynb_checkpoints
+
+# Deduplication and local state files
+processed_transactions.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend build artifacts
+node_modules/
+.next/
+out/
+npm-debug.log
+yarn-error.log

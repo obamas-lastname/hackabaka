@@ -8,7 +8,7 @@ For each transaction:
   3. Flags to hackathon FLAG_URL
   4. Also POSTs full transaction (with model results) to your Next.js frontend
 
-Frontend URL: http://localhost:3000/api/transactions
+Configuration: See .env file
 """
 
 import os
@@ -19,27 +19,38 @@ import urllib3
 import requests
 from sseclient import SSEClient
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# Load environment variables from .env file
+load_dotenv()
+
 # ============================================================
-# CONFIGURATION
+# CONFIGURATION (from .env)
 # ============================================================
 
-API_KEY = "85693b078643664d7ed495788f867daccc4121df8a7a71958647a64be942df47"
+API_KEY = os.getenv("API_KEY", "")
+STREAM_URL = os.getenv("STREAM_URL", "https://95.217.75.14:8443/stream")
+FLAG_URL = os.getenv("FLAG_URL", "https://95.217.75.14:8443/api/flag")
+LOCAL_PREDICT_URL = os.getenv("LOCAL_PREDICT_URL", "http://127.0.0.1:8000/predict?store=1")
+FRONTEND_POST_URL = os.getenv("FRONTEND_POST_URL", "http://localhost:3000/api/stream")
 
-STREAM_URL = "https://95.217.75.14:8443/stream"
-FLAG_URL = "https://95.217.75.14:8443/api/flag"
-LOCAL_PREDICT_URL = "http://127.0.0.1:8000/predict?store=1"
-FRONTEND_POST_URL = "https://hackabaka.vercel.app/api/stream"
+VERIFY_TLS = os.getenv("VERIFY_TLS", "false").lower() == "true"
+CONNECT_TIMEOUT = int(os.getenv("CONNECT_TIMEOUT", "5"))
+READ_TIMEOUT = os.getenv("READ_TIMEOUT", "None")
+if READ_TIMEOUT != "None":
+    READ_TIMEOUT = float(READ_TIMEOUT)
+else:
+    READ_TIMEOUT = None
+REQ_TIMEOUT = int(os.getenv("REQ_TIMEOUT", "10"))
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", "4"))
+THRESHOLD = float(os.getenv("THRESHOLD", "0.35"))
+PRINT_FEATURES = os.getenv("PRINT_FEATURES", "false").lower() == "true"
 
-VERIFY_TLS = False
-CONNECT_TIMEOUT = 5
-READ_TIMEOUT = None
-REQ_TIMEOUT = 10
-MAX_WORKERS = 4
-THRESHOLD = 0.35  # lower threshold → higher recall
-PRINT_FEATURES = False
+# Validate required configuration
+if not API_KEY:
+    raise ValueError("API_KEY is not set in .env file")
 
 stream_headers = {
     "X-API-Key": API_KEY,

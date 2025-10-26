@@ -1,18 +1,66 @@
 ## Environment Setup & Build
 
-To install all dependencies run:
+### 1. Environment Configuration
+
+Create a `.env` file in the project root (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your actual configuration:
+
+```env
+# API Authentication
+API_KEY=your_api_key_here
+
+# Hackathon API Endpoints
+STREAM_URL=https://95.217.75.14:8443/stream
+FLAG_URL=https://95.217.75.14:8443/api/flag
+
+# Local Backend
+LOCAL_PREDICT_URL=http://127.0.0.1:8000/predict?store=1
+
+# Frontend (for development, use localhost; for production, use your domain)
+FRONTEND_POST_URL=http://localhost:3000/api/stream
+# FRONTEND_POST_URL=https://hackabaka.vercel.app/api/stream  # Production
+
+# Connection Settings
+VERIFY_TLS=false
+CONNECT_TIMEOUT=5
+READ_TIMEOUT=None
+REQ_TIMEOUT=10
+
+# Model & Processing
+MAX_WORKERS=4
+THRESHOLD=0.35
+PRINT_FEATURES=false
+```
+
+**Important:** The `.env` file is git-ignored for security. Never commit API keys or sensitive data.
+
+### 2. Python Dependencies
+
+Install all dependencies:
+
 ```bash
 python3 -m venv venv
-source vevn/bin/activate
+source venv/bin/activate
 pip install -r requirements.txt
-``` 
+```
 
-To train the AI model on a given CSV dataset:
+### 3. Train the AI Model (Optional)
+
+To train the fraud detection model on a CSV dataset:
+
 ```bash
 python3 backend/train_model.py --input hackathon_train.csv --db history.db --output-model model.pkl --features backend/features.json
 ```
 
-To build the frontend:
+### 4. Frontend Dependencies
+
+Build the Next.js frontend:
+
 ```bash
 cd frontend
 npm install
@@ -21,27 +69,41 @@ npm run build
 
 ## Launch Backend & Frontend
 
-To run the frontend:
-```bash
-cd frontend
-npm run start
-```
+### Local Development (Manual)
 
-To run the backend:
+**Terminal 1 - Backend API:**
 ```bash
 cd backend
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
-python3 ../sse_to_predict.py
 ```
-## Docker setup
+
+**Terminal 2 - Stream Processor (reads from hackathon API & sends predictions):**
+```bash
+python3 sse_to_predict.py
 ```
+
+**Terminal 3 - Frontend Dashboard:**
+```bash
+cd frontend
+npm run dev
+```
+
+The dashboard will be available at `http://localhost:3000`
+
+### Docker Setup (Recommended for Production)
+
+```bash
 docker compose build
 docker compose up
 ```
+
 This launches three services:
 
-api → FastAPI backend on http://localhost:8000
+- **api** → FastAPI backend on http://localhost:8000
+- **web** → Next.js dashboard on http://localhost:3000  
+- **ingestor** → Background worker that listens to the live POS stream and feeds predictions into the system
 
-web → Next.js dashboard on http://localhost:3000
-
-ingestor → background worker that listens to the live POS stream and feeds predictions into the system
+To stop the services:
+```bash
+docker compose down
+```
