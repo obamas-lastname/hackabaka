@@ -1,6 +1,6 @@
 ## Environment Setup & Build
 
-### 1. Environment Configuration
+**1. Environment Configuration**
 
 Create a `.env` file in the project root (copy from `.env.example`):
 
@@ -29,7 +29,7 @@ For local development, you can override URLs as needed (e.g., `FRONTEND_POST_URL
 
 **Note:** The `.env` file is git-ignored for security. Never commit API keys or sensitive data.
 
-### 2. Python Dependencies
+**2. Python Dependencies**
 
 Install all dependencies:
 
@@ -39,7 +39,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Train the AI Model (Optional)
+**3. Train the AI Model**
 
 To train the fraud detection model on a CSV dataset:
 
@@ -47,7 +47,7 @@ To train the fraud detection model on a CSV dataset:
 python3 backend/train_model.py --input hackathon_train.csv --db history.db --output-model model.pkl --features backend/features.json
 ```
 
-### 4. Frontend Dependencies
+**4. Frontend Dependencies**
 
 Build the Next.js frontend:
 
@@ -58,8 +58,6 @@ npm run build
 ```
 
 ## Launch Backend & Frontend
-
-### Local Development (Manual)
 
 **Terminal 1 - Frontend Dashboard:**
 ```bash
@@ -73,7 +71,7 @@ cd backend
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
 ```
 
-**Terminal 3 - Stream Processor (reads from hackathon API & sends predictions):**
+**Terminal 3 - Stream Processor:**
 ```bash
 python3 sse_to_predict.py
 ```
