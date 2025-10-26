@@ -1,4 +1,3 @@
-venv
-.env
 *.csv
 *.pkl
+__pycache__/
