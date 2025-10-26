@@ -40,11 +40,11 @@ PRINT_FEATURES = False
 # CONFIGURATION (from .env) - API Key, URLs & Processing
 # ============================================================
 
-API_KEY = os.getenv("API_KEY", "85693b078643664d7ed495788f867daccc4121df8a7a71958647a64be942df47")
-STREAM_URL = os.getenv("STREAM_URL", "https://95.217.75.14:8443/stream")
-FLAG_URL = os.getenv("FLAG_URL", "https://95.217.75.14:8443/api/flag")
-LOCAL_PREDICT_URL = os.getenv("LOCAL_PREDICT_URL", "http://127.0.0.1:8000/predict?store=1")
-FRONTEND_POST_URL = os.getenv("FRONTEND_POST_URL", "https://hackabaka.vercel.app/api/stream")
+API_KEY = os.getenv("API_KEY")
+STREAM_URL = os.getenv("STREAM_URL")
+FLAG_URL = os.getenv("FLAG_URL")
+LOCAL_PREDICT_URL = os.getenv("LOCAL_PREDICT_URL")
+FRONTEND_POST_URL = os.getenv("FRONTEND_POST_URL")
 
 MAX_WORKERS = int(os.getenv("MAX_WORKERS", "4"))
 THRESHOLD = float(os.getenv("THRESHOLD", "0.35"))

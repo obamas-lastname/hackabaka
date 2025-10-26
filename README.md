@@ -67,33 +67,16 @@ cd backend
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
 ```
 
-**Terminal 2 - Stream Processor (reads from hackathon API & sends predictions):**
+**Terminal 2 - Frontend Dashboard:**
+```bash
+cd frontend
+npm run start
+```
+
+**Terminal 3 - Stream Processor (reads from hackathon API & sends predictions):**
 ```bash
 python3 sse_to_predict.py
 ```
 
-**Terminal 3 - Frontend Dashboard:**
-```bash
-cd frontend
-npm run dev
-```
-
 The dashboard will be available at `http://localhost:3000`
 
-### Docker Setup (Recommended for Production)
-
-```bash
-docker compose build
-docker compose up
-```
-
-This launches three services:
-
-- **api** → FastAPI backend on http://localhost:8000
-- **web** → Next.js dashboard on http://localhost:3000  
-- **ingestor** → Background worker that listens to the live POS stream and feeds predictions into the system
-
-To stop the services:
-```bash
-docker compose down
-```
