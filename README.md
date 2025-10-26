@@ -32,3 +32,12 @@ To run the backend:
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
 python3 sse_to_predict.py
 ```
+## Docker setup
+```
+docker compose build
+docker compose up
+```
+This launches three services:
+api → FastAPI backend on http://localhost:8000
+web → Next.js dashboard on http://localhost:3000
+ingestor → background worker that listens to the live POS stream and feeds predictions into the system
