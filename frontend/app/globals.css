@@ -127,7 +127,14 @@
 .recharts-tooltip-wrapper {
   background-color: rgb(30, 30, 30) !important;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8) !important;
+  padding: 10px !important;
+  z-index: 9999 !important;
+}
+
+.recharts-tooltip-wrapper * {
+  color: rgb(220, 220, 220) !important;
+  fill: rgb(220, 220, 220) !important;
 }
 
 .recharts-tooltip-cursor {
@@ -137,16 +144,54 @@
 
 .recharts-default-tooltip {
   background-color: rgb(30, 30, 30) !important;
-  border: 1px solid rgb(60, 60, 60) !important;
-  border-radius: 0.5rem;
+  border: 2px solid rgb(100, 100, 100) !important;
+  border-radius: 0.5rem !important;
+  padding: 12px !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8) !important;
 }
 
 .recharts-tooltip-label {
-  color: rgb(220, 220, 220);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  color: rgb(220, 220, 220) !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+  font-size: 14px !important;
 }
 
 .recharts-tooltip-item {
-  color: rgb(220, 220, 220);
+  color: rgb(220, 220, 220) !important;
+  display: block !important;
+  padding: 4px 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.recharts-tooltip-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Specific styles for different wrapper positions */
+.recharts-tooltip-wrapper-right,
+.recharts-tooltip-wrapper-left,
+.recharts-tooltip-wrapper-top,
+.recharts-tooltip-wrapper-bottom {
+  background-color: rgb(30, 30, 30) !important;
+  border: 2px solid rgb(100, 100, 100) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Ensure all text is visible */
+.recharts-tooltip-wrapper,
+.recharts-default-tooltip {
+  color: rgb(220, 220, 220) !important;
+}
+
+.recharts-tooltip-wrapper > div,
+.recharts-default-tooltip > div,
+.recharts-tooltip-wrapper span,
+.recharts-default-tooltip span {
+  color: rgb(220, 220, 220) !important;
+  background-color: transparent !important;
 }

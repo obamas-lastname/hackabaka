@@ -17,7 +17,7 @@ import { Card } from "@/components/ui/card";
 import Header from "@/components/ui/header";
 import { Transaction } from "@/components/transaction-table";
 import { StatsCard } from "@/components/stats-card";
-import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartLegend, ChartTooltipContent } from "@/components/ui/chart";
 import { AlertCircle, TrendingUp, CreditCard, BarChart3 } from "lucide-react";
 
 type TimeSeriesData = {
@@ -348,32 +348,45 @@ export default function StatisticsPage() {
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Fraud vs Legitimate Pie Chart */}
+            {/* Transaction Distribution Donut Chart */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Transaction Distribution</h3>
               <div className="h-80 w-full flex items-center justify-center">
                 {pieData.some((d) => d.value > 0) ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }) =>
-                          `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
-                        }
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                      <ChartTooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <ChartContainer
+                    config={{
+                      legitimateCount: { label: "Legitimate", color: "#22c55e" },
+                      fraudCount: { label: "Fraudulent", color: "#ef4444" },
+                    }}
+                    className="w-full h-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value, percent }) =>
+                            `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                          }
+                          innerRadius={60}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                          paddingAngle={2}
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent hideLabel />}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
                 ) : (
                   <p className="text-muted-foreground">No data yet</p>
                 )}
