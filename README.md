@@ -1,4 +1,5 @@
-## Usage
+## Model training & frontend building
+
 To install all dependencies run:
 ```bash
 python3 -m venv venv
@@ -11,7 +12,22 @@ To train the AI model on a given CSV dataset:
 python3 train_model.py --input hackathon_train.csv --db history.db --output-model model.pkl --features features.json
 ```
 
-To run the AI model as backend:
+To build the frontend:
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+## Running the model and frontend
+
+To run the frontend:
+```bash
+cd frontend
+npm run start
+```
+
+To run the backend:
 ```bash
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
 python3 sse_to_predict.py
