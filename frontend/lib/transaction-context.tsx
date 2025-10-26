@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
 import { Transaction } from "@/components/transaction-table";
 import { SSEClient } from "./sse-client";
 
@@ -18,10 +18,16 @@ const TransactionContext = createContext<TransactionContextType | undefined>(und
 export function TransactionProvider({ children }: { children: ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isFrozen, setIsFrozen] = useState(false);
+  const isFrozenRef = useRef(false);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isFrozenRef.current = isFrozen;
+  }, [isFrozen]);
 
   const addTransaction = (transaction: Transaction) => {
-    // Only add transaction if not frozen
-    if (!isFrozen) {
+    // Only add transaction if not frozen (use ref to get current value)
+    if (!isFrozenRef.current) {
       setTransactions((prev) => [transaction, ...prev]);
     }
   };
