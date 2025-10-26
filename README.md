@@ -1,4 +1,4 @@
-## Model training & frontend building
+## Environment Setup & Build
 
 To install all dependencies run:
 ```bash
@@ -19,7 +19,7 @@ npm install
 npm run build
 ```
 
-## Running the model and frontend
+## Launch Backend & Frontend
 
 To run the frontend:
 ```bash
