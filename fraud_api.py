@@ -13,7 +13,7 @@ from fastapi import FastAPI, Query, HTTPException
 from features import ensure_schema, insert_tx, tx_to_features, ordered_feature_row, FEATURE_ORDER
 
 DB_PATH = os.environ.get("FRAUD_DB", "history.db")
-MODEL_PATH = os.environ.get("FRAUD_MODEL", "model.pkl")
+MODEL_PATH = os.environ.get("FRAUD_MODEL", "model2.pkl")
 FEATURES_PATH = os.environ.get("FRAUD_FEATURES", "features.json")
 
 # >>> THIS must exist at top-level <<<
