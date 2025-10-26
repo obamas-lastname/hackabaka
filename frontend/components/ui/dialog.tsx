@@ -61,6 +61,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "bg-background fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 rounded-xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] w-[90%] max-w-3xl",
+          "data-[state=open]:animate-none", // Remove any pulsation animation
           className
         )}
         {...props}
