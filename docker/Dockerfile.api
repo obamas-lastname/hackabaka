@@ -1,29 +1,24 @@
-
 # Backend API (FastAPI + Uvicorn)
-FROM python:3.11-slim AS base
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# System deps
-RUN apt-get update && apt-get install -y --no-install-recommends     build-essential curl &&     rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy backend and shared files
-COPY hackabaka-main/backend ./backend
-COPY hackabaka-main/requirements.txt ./requirements.txt
-
+# Python deps
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Default model + feature paths (overridden by env at runtime)
-ENV FRAUD_DB=/data/history.db     FRAUD_MODEL=/models/model2.pkl     FRAUD_FEATURES=/models/features.json
+# App code (root-level backend)
+COPY . .
 
-# Create folders for bind volumes
+ENV FRAUD_DB=/data/history.db \
+    FRAUD_MODEL=/models/model2.pkl \
+    FRAUD_FEATURES=/models/features.json
+
 RUN mkdir -p /data /models
-
-# Optionally create a dummy model at build time so the API boots even without a trained model
-# You can replace it later by training and mounting a real model to /models/model2.pkl
-RUN python - <<'PY'import os, joblib, numpy as npfrom sklearn.ensemble import RandomForestClassifierimport json, pathlib, syssys.path.append('/app/backend')from features import FEATURE_ORDERX = np.zeros((10, len(FEATURE_ORDER)), dtype=float)y = np.zeros((10,), dtype=int)clf = RandomForestClassifier(n_estimators=10, random_state=42)clf.fit(X, y)os.makedirs('/models', exist_ok=True)joblib.dump(clf, '/models/model2.pkl')with open('/models/features.json', 'w', encoding='utf-8') as f:    json.dump(FEATURE_ORDER, f)print(f"Built dummy model with {len(FEATURE_ORDER)} features")PY
-
-WORKDIR /app/backend
 
 EXPOSE 8000
 CMD ["uvicorn", "fraud_api:app", "--host", "0.0.0.0", "--port", "8000"]
