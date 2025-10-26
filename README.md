@@ -29,8 +29,9 @@ npm run start
 
 To run the backend:
 ```bash
+cd backend
 python3 -m uvicorn fraud_api:app --host 127.0.0.1 --port 8000
-python3 sse_to_predict.py
+python3 ../sse_to_predict.py
 ```
 ## Docker setup
 ```
