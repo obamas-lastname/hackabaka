@@ -406,7 +406,7 @@ export default function StatisticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                     <XAxis type="number" tick={{ fontSize: 12 }} />
                     <YAxis dataKey="category" type="category" width={140} tick={{ fontSize: 11 }} />
-                    <ChartTooltip />
+                    <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                     <ChartLegend />
                     <Bar dataKey="legitimateCount" fill="#22c55e" name="Legitimate" stackId="a" radius={[0, 4, 4, 0]} />
                     <Bar dataKey="fraudCount" fill="#ef4444" name="Fraudulent" stackId="a" radius={[0, 4, 4, 0]} />
@@ -427,7 +427,7 @@ export default function StatisticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                     <XAxis dataKey="ageGroup" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} />
-                    <ChartTooltip />
+                    <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                     <ChartLegend />
                     <Bar dataKey="legitimateCount" fill="#22c55e" name="Legitimate" stackId="a" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="fraudCount" fill="#ef4444" name="Fraudulent" stackId="a" radius={[4, 4, 0, 0]} />
@@ -449,7 +449,7 @@ export default function StatisticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                     <XAxis type="number" tick={{ fontSize: 12 }} />
                     <YAxis dataKey="state" type="category" width={40} tick={{ fontSize: 11 }} />
-                    <ChartTooltip />
+                    <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                     <ChartLegend />
                     <Bar dataKey="legitimateCount" fill="#22c55e" name="Legitimate" stackId="a" radius={[0, 4, 4, 0]} />
                     <Bar dataKey="fraudCount" fill="#ef4444" name="Fraudulent" stackId="a" radius={[0, 4, 4, 0]} />
